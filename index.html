@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wazir Lap2 Simulation</title>
+    <style>
+        body {font-family: Arial, sans-serif; margin: 2rem; background:#f9f9f9;}
+        h1 {color:#333;}
+        .link-list {margin-top:1.5rem;}
+        .link-item {margin:0.8rem 0;}
+        a {text-decoration:none; color:#0066cc;}
+        a:hover {text-decoration:underline;}
+        iframe {width:100%; height:80vh; border:none; margin-top:1rem;}
+    </style>
+    <script>
+        function loadPage(url) {
+            const frame = document.getElementById('viewer');
+            frame.src = url;
+        }
+    </script>
+</head>
+<body>
+    <h1>Wazir Lap2 Simulation</h1>
+    <p>Select a simulation view:</p>
+    <div class="link-list">
+        <div class="link-item"><a href="#" onclick="loadPage('Trial%20of%20Titans_%20Organiser%20Console%20(Private).html');return false;">Organiser Console (Private)</a></div>
+        <div class="link-item"><a href="#" onclick="loadPage('Trial%20of%20Titans_%20Participant%20Simulation.html');return false;">Participant Simulation</a></div>
+    </div>
+    <iframe id="viewer" src=""></iframe>
+</body>
+</html>
