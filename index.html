@@ -1,95 +1,230 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Wazir Lap2 Simulation</title>
-    <style>
-        body {font-family: Arial, sans-serif; margin: 1rem; background:#f9f9f9; display:flex; flex-direction:column; align-items:center;}
-        header {width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;}
-        h1 {margin:0; font-size:1.5rem; color:#333;}
-        #timer {font-weight:bold; background:#eee; padding:0.3rem 0.6rem; border-radius:4px;}
-        #progress {width:100%; background:#e0e0e0; height:8px; border-radius:4px; margin:0.5rem 0;}
-        #fill {background:#4caf50; width:0%; height:100%; border-radius:4px; transition:width 0.3s;}
-        .link-list {margin-top:1rem; width:100%; max-width:400px;}
-        .link-item {margin:0.6rem 0;}
-        a {text-decoration:none; color:#0066cc; font-size:1.1rem; display:block; padding:0.4rem; border:1px solid #0066cc; border-radius:4px; text-align:center;}
-        a:hover {background:#0066c033;}
-        iframe {width:100%; height:60vh; border:none; margin-top:1rem;}
-        #completeBtn, #copyBtn {margin-top:0.8rem; padding:0.5rem 1rem; font-size:1rem; cursor:pointer;}
-        /* Modal */
-        #onboardModal {position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center;}
-        #onboardContent {background:#fff; padding:1.5rem; border-radius:8px; max-width:90%; text-align:center;}
-        #onboardContent button {margin-top:1rem; padding:0.5rem 1rem;}
-        @media (max-width:600px) {
-            a {font-size:1rem;}
-            iframe {height:50vh;}
-        }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script>
-        // Onboarding modal
-        window.addEventListener('load',()=>{
-            const modal=document.getElementById('onboardModal');
-            modal.style.display='flex';
-        });
-        function closeModal(){document.getElementById('onboardModal').style.display='none';}
-        // Timer (15 minutes)
-        let secs=15*60; const timerEl=document.getElementById('timer');
-        const timerInterval=setInterval(()=>{
-            secs--; const m=String(Math.floor(secs/60)).padStart(2,'0'); const s=String(secs%60).padStart(2,'0');
-            timerEl.textContent=`${m}:${s}`;
-            if(secs<=0){clearInterval(timerInterval); disableLinks(); alert('Time is up!');}
-        },1000);
-        function disableLinks(){document.querySelectorAll('a').forEach(a=>a.style.pointerEvents='none');}
-        // Progress
-        let progress=0; const fill=document.getElementById('fill');
-        function updateProgress(){
-            progress+=50; // two steps total
-            fill.style.width=`${progress}%`;
-            if(progress===100){showCongrats();}
-        }
-        function showCongrats(){
-            confetti();
-            document.getElementById('completeBtn').style.display='none';
-            document.getElementById('copyBtn').style.display='inline-block';
-        }
-        // Load page into iframe and show complete button
-        function loadPage(url){
-            const frame=document.getElementById('viewer');
-            frame.src=url;
-            document.getElementById('completeBtn').style.display='inline-block';
-        }
-        function markDone(){
-            updateProgress();
-            document.getElementById('completeBtn').style.display='none';
-        }
-        function copyResult(){
-            const url=location.origin+location.pathname+`?score=${progress}`;
-            navigator.clipboard.writeText(url).then(()=>alert('Result link copied!'));
-        }
-    </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wazir Lap2 Consulting Simulation</title>
+  <style>
+    body {font-family:Arial,Helvetica,sans-serif; margin:1rem; background:#f9f9f9; display:flex; flex-direction:column; align-items:center;}
+    header {max-width:800px; text-align:center; margin-bottom:1rem;}
+    #content {max-width:800px; width:100%; background:#fff; padding:1rem; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+    .clue-card {border:1px solid #0066cc; border-radius:4px; padding:0.5rem; margin:0.3rem 0; cursor:pointer; background:#e8f0fe;}
+    .clue-revealed {background:#d0e6ff;}
+    textarea, input[type="text"] {width:100%; padding:0.5rem; margin-top:0.5rem; border:1px solid #ccc; border-radius:4px;}
+    button {margin-top:0.5rem; padding:0.5rem 1rem; background:#0066cc; color:#fff; border:none; border-radius:4px; cursor:pointer;}
+    button:disabled {background:#aaa; cursor:not-allowed;}
+    #progress {height:8px; background:#e0e0e0; border-radius:4px; margin:1rem 0; width:100%;}
+    #fill {background:#4caf50; height:100%; width:0%; transition:width 0.3s;}
+    #thankyou {text-align:center; padding:2rem;}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script>
+    const rounds = [
+      {
+        clueCards: [
+          {title:"Clue 1", text:"Market share dropped 5% last quarter."},
+          {title:"Clue 2", text:"Competitor launched a cheaper product."},
+          {title:"Clue 3", text:"Customer satisfaction score is 78."}
+        ],
+        question: "What is the primary cause of the decline?",
+        curveball: "A new regulation will increase production costs by 10%. Do you want to revise your answer?"
+      },
+      {
+        clueCards: [
+          {title:"Clue 1", text:"Supply chain delays added 2 weeks to lead time."},
+          {title:"Clue 2", text:"Raw material price up 12%.",},
+          {title:"Clue 3", text:"Warehouse capacity at 90%.",}
+        ],
+        question: "How would you mitigate the supply‑chain issue?",
+        curveball: "A key supplier is exiting the market. Revise your plan?"
+      },
+      {
+        clueCards: [
+          {title:"Clue 1", text:"Team morale is low after recent layoffs."},
+          {title:"Clue 2", text:"Retention rate dropped 8%.",},
+          {title:"Clue 3", text:"Internal survey shows desire for remote work.",}
+        ],
+        question: "What initiative would you propose to improve morale?",
+        curveball: "Budget cuts reduce training funds by 25%. Adjust your proposal?"
+      }
+    ];
+    let currentRound = 0;
+    const answers = [];
+    const revisions = [];
+
+    function init(){
+      document.getElementById('queenMessage').textContent = "Your Majesty, the Queen, summons the Commander to solve a pressing consulting challenge. Follow the rounds, gather clues, answer questions, and adapt to curveballs.";
+      renderRound();
+    }
+
+    function renderRound(){
+      const r = rounds[currentRound];
+      const container = document.getElementById('content');
+      container.innerHTML = '';
+      const roundHeader = document.createElement('h2');
+      roundHeader.textContent = `Round ${currentRound+1}`;
+      container.appendChild(roundHeader);
+
+      // clue cards
+      const clueDiv = document.createElement('div');
+      clueDiv.id = 'clues';
+      r.clueCards.forEach((c,i)=>{
+        const card = document.createElement('div');
+        card.className = 'clue-card';
+        card.textContent = c.title;
+        card.dataset.idx = i;
+        card.onclick = ()=>toggleClue(card,c);
+        clueDiv.appendChild(card);
+      });
+      container.appendChild(clueDiv);
+
+      // space for revealed clues
+      const revealed = document.createElement('div');
+      revealed.id = 'revealedClues';
+      container.appendChild(revealed);
+
+      // question area (initially disabled)
+      const qDiv = document.createElement('div');
+      qDiv.id = 'questionDiv';
+      qDiv.style.marginTop = '1rem';
+      const qLabel = document.createElement('p');
+      qLabel.textContent = r.question;
+      qDiv.appendChild(qLabel);
+      const qArea = document.createElement('textarea');
+      qArea.id = 'answerArea';
+      qArea.rows = 3;
+      qArea.disabled = true;
+      qDiv.appendChild(qArea);
+      const qBtn = document.createElement('button');
+      qBtn.id = 'answerBtn';
+      qBtn.textContent = 'Submit Answer';
+      qBtn.disabled = true;
+      qBtn.onclick = submitAnswer;
+      qDiv.appendChild(qBtn);
+      container.appendChild(qDiv);
+
+      updateProgress();
+    }
+
+    function toggleClue(card, clue){
+      const revealed = document.getElementById('revealedClues');
+      if(card.classList.contains('clue-revealed')){
+        // hide
+        card.classList.remove('clue-revealed');
+        const el = document.getElementById('clue-'+card.dataset.idx);
+        if(el) el.remove();
+      } else {
+        card.classList.add('clue-revealed');
+        const p = document.createElement('p');
+        p.id = 'clue-'+card.dataset.idx;
+        p.textContent = clue.text;
+        p.style.marginLeft='1rem';
+        revealed.appendChild(p);
+      }
+      // enable question if any clue revealed
+      const anyRevealed = document.querySelectorAll('.clue-revealed').length>0;
+      document.getElementById('answerArea').disabled = !anyRevealed;
+      document.getElementById('answerBtn').disabled = !anyRevealed;
+    }
+
+    function submitAnswer(){
+      const ans = document.getElementById('answerArea').value.trim();
+      if(!ans){alert('Please provide an answer.');return;}
+      answers[currentRound] = ans;
+      showCurveball();
+    }
+
+    function showCurveball(){
+      const r = rounds[currentRound];
+      const container = document.getElementById('content');
+      container.innerHTML = '';
+      const curve = document.createElement('div');
+      const p = document.createElement('p');
+      p.textContent = r.curveball;
+      curve.appendChild(p);
+      const revBtn = document.createElement('button');
+      revBtn.textContent = 'Revise Answer';
+      revBtn.onclick = ()=>reviseAnswer();
+      const contBtn = document.createElement('button');
+      contBtn.textContent = 'Continue';
+      contBtn.style.marginLeft='0.5rem';
+      contBtn.onclick = ()=>nextRound();
+      curve.appendChild(revBtn);
+      curve.appendChild(contBtn);
+      container.appendChild(curve);
+    }
+
+    function reviseAnswer(){
+      const container = document.getElementById('content');
+      container.innerHTML = '';
+      const r = rounds[currentRound];
+      const revDiv = document.createElement('div');
+      const label = document.createElement('p');
+      label.textContent = `Revise answer for: ${r.question}`;
+      revDiv.appendChild(label);
+      const area = document.createElement('textarea');
+      area.id = 'revArea';
+      area.rows = 3;
+      area.value = answers[currentRound];
+      revDiv.appendChild(area);
+      const saveBtn = document.createElement('button');
+      saveBtn.textContent = 'Save Revised';
+      saveBtn.onclick = ()=>{
+        answers[currentRound] = area.value.trim();
+        nextRound();
+      };
+      revDiv.appendChild(saveBtn);
+      container.appendChild(revDiv);
+    }
+
+    function nextRound(){
+      currentRound++;
+      if(currentRound < rounds.length){
+        renderRound();
+      } else {
+        finalStage();
+      }
+    }
+
+    function finalStage(){
+      const container = document.getElementById('content');
+      container.innerHTML = '';
+      const h = document.createElement('h2');
+      h.textContent = 'Final Answer to the Queen';
+      container.appendChild(h);
+      const ta = document.createElement('textarea');
+      ta.id = 'finalAnswer';
+      ta.rows = 5;
+      ta.placeholder = 'Summarize your recommendations across all rounds...';
+      container.appendChild(ta);
+      const btn = document.createElement('button');
+      btn.textContent = 'Submit Final Answer';
+      btn.onclick = ()=>showThankYou();
+      container.appendChild(btn);
+    }
+
+    function showThankYou(){
+      const container = document.getElementById('content');
+      container.innerHTML = '<div id="thankyou"><h2>Thank you, Commander!</h2><p>Your comprehensive answer has been recorded.</p></div>';
+      // optional confetti
+      confetti();
+    }
+
+    function updateProgress(){
+      const fill = document.getElementById('fill');
+      const pct = Math.round((currentRound/rounds.length)*100);
+      fill.style.width = pct + '%';
+    }
+
+    window.onload = init;
+  </script>
 </head>
 <body>
-    <div id="onboardModal">
-        <div id="onboardContent">
-            <h2>Welcome to the Wazir Lap2 Simulation</h2>
-            <p>• Click a view to load the simulation.<br>• When you have explored it, press "Mark as Completed".<br>• Complete both views to earn the Consultant‑of‑the‑Year badge.</p>
-            <button onclick="closeModal()">Got it</button>
-        </div>
-    </div>
-    <header>
-        <h1>Wazir Lap2 Simulation</h1>
-        <span id="timer" aria-label="time remaining">15:00</span>
-    </header>
+  <header>
+    <h1>Wazir Lap2 Consulting Simulation</h1>
+    <p id="queenMessage"></p>
     <div id="progress"><div id="fill"></div></div>
-    <p>Select a simulation view:</p>
-    <div class="link-list">
-        <div class="link-item"><a href="#" onclick="loadPage('Trial%20of%20Titans_%20Organiser%20Console%20(Private).html');return false;" aria-label="Open Organiser Console">Organiser Console (Private)</a></div>
-        <div class="link-item"><a href="#" onclick="loadPage('Trial%20of%20Titans_%20Participant%20Simulation.html');return false;" aria-label="Open Participant Simulation">Participant Simulation</a></div>
-    </div>
-    <button id="completeBtn" style="display:none;" onclick="markDone()">Mark as Completed</button>
-    <button id="copyBtn" style="display:none;" onclick="copyResult()">Copy Result Link</button>
-    <iframe id="viewer" src=""></iframe>
+  </header>
+  <div id="content"></div>
 </body>
 </html>
