@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trial of Titans: Organiser Console</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--ink:#0D0D10;--panel:#12466B;--bz:#C9A24B;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:linear-gradient(90deg,#0D0D10 0%,#0B5A8F 100%) fixed,#0D0D10;color:#fff;font:15px/1.5 Lato,Arial,sans-serif}
+#app{max-width:1180px;margin:0 auto;padding:16px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.2);padding-bottom:12px}
+.brand{font-family:Cinzel,serif;font-weight:700;font-size:20px;letter-spacing:3px}
+.brand small{display:block;font:400 11px Lato,sans-serif;letter-spacing:2px;color:var(--bz)}
+.card{background:rgba(8,24,40,.7);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:18px;margin-top:14px}
+h2{font-family:Cinzel,serif;font-size:20px;margin:0 0 8px}
+.k{font-size:12px;letter-spacing:2px;color:var(--bz)}
+button{min-height:40px;padding:0 18px;border:1px solid rgba(255,255,255,.5);border-radius:8px;background:var(--panel);color:#fff;font:700 14px Lato,Arial,sans-serif;cursor:pointer}
+button.p{background:#fff;color:var(--ink);border-color:#fff}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--bz);outline-offset:2px}
+textarea,input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.4);background:rgba(13,13,16,.6);color:#fff;font:14px Lato,Arial,sans-serif}
+textarea{min-height:90px;font-family:monospace;font-size:12px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.sc{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:760px}
+th,td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.2);text-align:left;white-space:nowrap}
+th{font-size:12px;letter-spacing:1px;color:var(--bz)}
+tr.r{cursor:pointer}tr.r:hover,tr.sel{background:#12466B}
+td.n{font-family:Cinzel,serif;font-weight:700;font-size:18px}
+.tb{font-size:11px;color:var(--bz)}
+.bad{color:#ff9b9b}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:10px}
+.st{background:var(--panel);border-radius:10px;padding:10px}.st b{display:block;font-family:Cinzel,serif;font-size:22px;color:var(--bz)}
+.tl{list-style:none;margin:8px 0 0;padding:0;border-left:2px solid var(--bz)}
+.tl li{padding:4px 0 4px 14px;position:relative}.tl li:before{content:"";position:absolute;left:-6px;top:11px;width:10px;height:10px;border-radius:50%;background:#fff}
+.tl time{display:inline-block;width:52px;color:var(--bz);font-variant-numeric:tabular-nums}
+.ans{background:rgba(13,13,16,.55);border-radius:8px;padding:10px;margin-top:8px;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const CLN={pr:'Price Tablet',sc:'Treasury Scales',dy:'Dockyard',sl:'Scroll of Numbers'};
+const FON={a:'Trim discounts',b:'Delay supplier payments',c:'Sell old press',d:'Short-term loan'};
+const FO={a:[12,0],b:[20,4],c:[8,1],d:[25,2]};
+const MVN={fix:'Fix the bottling line',clean:'Clean up the returns data',disc:'Cut the deep discounts',supp:'Renegotiate supplier terms',loan:'Take a short-term loan',flav:'Launch a new flavour'};
+const MV={fix:5,clean:4,disc:3,supp:3,loan:1,flav:0};
+const DG=['Discounting','Bottling delays','Data errors','Interest costs'];
+const LB=['','Higher auto score','Higher judge score','Faster finish','Earlier submission','Team name'];
+const $=s=>document.querySelector(s);
+const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const hs=s=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return(h>>>0).toString(36)};
+const fmt=n=>Math.floor(n/60)+':'+String(n%60).padStart(2,'0');
+let D={codes:[],marks:{}},sel=null,msg='',armed=0;
+try{const r=localStorage.getItem('tot27org2');if(r)D=JSON.parse(r)}catch(e){}
+const save=()=>{try{localStorage.setItem('tot27org2',JSON.stringify(D))}catch(e){}};
+function parse(line){const i=line.lastIndexOf('.');if(i<1)throw 0;const b=line.slice(0,i),h=line.slice(i+1);const j=decodeURIComponent(escape(atob(b)));const s=JSON.parse(j);s.ok=hs(j+'tot27')==h;s.raw=line;s.key=s.t+'|'+s.c+'|'+s.s;return s}
+const subs=()=>D.codes.map(l=>{try{return parse(l)}catch(e){return null}}).filter(Boolean);
+function calc(s){const g=k=>{for(let i=s.l.length-1;i>=0;i--)if(s.l[i][1]==k)return s.l[i][2]};
+ const d=g('pr'),pr=typeof d=='number'?8*Math.max(0,(30-d)*(1000+35*d))/30017:0;
+ const ids=g('sc')||[];let cash=0,harm=0;ids.forEach(i=>{cash+=FO[i][0];harm+=FO[i][1]});
+ const sc=ids.length?Math.max(0,Math.min(8,Math.min(cash,30)/30*5+3-harm*.6)):0;
+ const y=g('dy'),dy=y=='Bottling'?8:y=='Dispatch'?1:0,sl=g('sl')=='West'?8:0;
+ const diag=[3,10,2,1][g('diag')]||0;
+ const pl=g('plan')||[],dr=g('drop');let plan=0;if(pl.length==3&&dr){const mn=Math.min(...pl.map(k=>MV[k]));plan=pl.filter(k=>k!=dr).reduce((a,k)=>a+MV[k],0)+(MV[dr]==mn?1:0)}
+ const sm=g('storm')||[],storm=sm[0]=='turn'?4:sm[0]=='stay'?2:0;
+ const auto=pr+sc+dy+sl+diag+plan+storm,m=D.marks[s.key]||[0,0],man=(+m[0]||0)+(+m[1]||0),tempo=Math.max(0,1-s.x/1200);
+ return{pr,sc,dy,sl,diag,plan,storm,auto,man,tempo,total:auto+man+tempo}}
+function ranked(){return subs().map(s=>({s,c:calc(s)})).map(r=>(r.k=[-+r.c.total.toFixed(2),-+r.c.auto.toFixed(2),-+r.c.man.toFixed(2),r.s.x,r.s.e,r.s.t.toLowerCase()],r)).sort((a,b)=>{for(let i=0;i<6;i++){if(a.k[i]<b.k[i])return-1;if(a.k[i]>b.k[i])return 1}return 0})}
+function desc(k,v){const t={start:'Entered the hall',end:'Voyage sealed',timeout:'Daylight ran out',disp:'Dispatch sent'}[k];if(t)return t;
+ if(k=='open')return'Opened '+CLN[v];if(k=='pr')return'Price Tablet: set discount to '+v+'%';
+ if(k=='sc')return'Treasury Scales: chose '+(v||[]).map(i=>FON[i]).join(', ');if(k=='dy')return'Dockyard: tapped '+v;
+ if(k=='sl')return'Scroll of Numbers: questioned '+v;if(k=='diag')return'Named cause: '+DG[v];
+ if(k=='raven')return'Raven curveball: '+(v=='keep'?'kept the answer':'revised the answer');
+ if(k=='plan')return'Chose three moves: '+v.map(x=>MVN[x]).join(', ');if(k=='drop')return'Decree: dropped '+MVN[v];
+ if(k=='storm')return'Storm: '+(v[0]=='turn'?'turned back':'stayed the course');return k}
+function draw(){const R=ranked();
+ let h=`<div class="top"><div class="brand">TRIAL OF TITANS<small>ORGANISER CONSOLE · CONSULTANT OF THE YEAR 2027 · PRIVATE, DO NOT SHARE WITH TEAMS</small></div><div class="k">${R.length} VOYAGES RECEIVED</div></div>`;
+ h+=`<div class="card"><h2>Add voyage seals</h2><p style="margin:0 0 8px;opacity:.85">Paste one seal per line, exactly as teams hand them in.</p><textarea id="in" aria-label="Voyage seals"></textarea><div class="row"><button class="p" data-a="add">Add to scoreboard</button><span id="ms">${E(msg)}</span></div></div>`;
+ h+=`<div class="card"><div class="row" style="margin:0 0 8px;justify-content:space-between"><h2 style="margin:0">Scoreboard</h2><div class="row" style="margin:0"><button data-a="tsv">Copy scoresheet</button><button data-a="clr">${armed?'Click again to confirm':'Clear all'}</button></div></div><div class="sc"><table><tr><th>RANK</th><th>TEAM</th><th>TOTAL</th><th>AUTO /56</th><th>JUDGE /20</th><th>TABLET</th><th>SCALES</th><th>DOCK</th><th>SCROLL</th><th>CAUSE</th><th>PLAN</th><th>STORM</th><th>TIME</th><th>TIE-BREAK</th></tr>`;
+ R.forEach((r,i)=>{const p=R[i-1];let tb='';if(p&&p.k[0]==r.k[0]){let j=1;while(j<5&&p.k[j]==r.k[j])j++;tb=LB[j]}const c=r.c;
+  h+=`<tr class="r ${sel==r.s.key?'sel':''}" data-a="sel" data-v="${E(r.s.key)}"><td class="n">${i+1}</td><td>${E(r.s.t)}${r.s.ok?'':' <span class="bad">(seal altered)</span>'}</td><td><b>${c.total.toFixed(2)}</b></td><td>${c.auto.toFixed(1)}</td><td>${c.man.toFixed(1)}</td><td>${c.pr.toFixed(1)}</td><td>${c.sc.toFixed(1)}</td><td>${c.dy}</td><td>${c.sl}</td><td>${c.diag}</td><td>${c.plan}</td><td>${c.storm}</td><td>${fmt(r.s.x)}</td><td class="tb">${tb}</td></tr>`});
+ h+=`</table></div>${R.length?'':'<p>No voyages yet.</p>'}<p class="k" style="margin-top:10px">TIE RULE: total points, then auto score, judge score, faster finish, earlier submission, team name. Rankings never tie.</p><p style="font-size:13px;opacity:.75;margin:6px 0 0">Private key: Tablet = pricing, Scales = cash and funding, Dockyard = operations, Scroll = data and analytics. Teams never see these labels.</p></div>`;
+ const r=R.find(x=>x.s.key==sel);if(r)h+=detail(r);
+ $('#app').innerHTML=h}
+function detail(r){const s=r.s,c=r.c,m=D.marks[s.key]||[0,0];const g=k=>{for(let i=s.l.length-1;i>=0;i--)if(s.l[i][1]==k)return s.l[i][2]};const sm=g('storm')||[];
+ let h=`<div class="card"><h2>${E(s.t)} <span class="k">${E(s.c)}</span></h2><div class="g"><div class="st"><b>${c.total.toFixed(2)}</b>Total</div><div class="st"><b>${c.pr.toFixed(1)}</b>Tablet /8</div><div class="st"><b>${c.sc.toFixed(1)}</b>Scales /8</div><div class="st"><b>${c.dy}</b>Dockyard /8</div><div class="st"><b>${c.sl}</b>Scroll /8</div><div class="st"><b>${c.diag}</b>Cause /10</div><div class="st"><b>${c.plan}</b>Plan /10</div><div class="st"><b>${c.storm}</b>Storm /4</div><div class="st"><b>${c.tempo.toFixed(2)}</b>Tempo /1</div></div>`;
+ h+=`<div class="k" style="margin-top:14px">JUDGE MARKS</div><div class="g"><div>Dispatch (0 to 15)<input type="number" min="0" max="15" step="0.5" value="${m[0]||0}" data-m="0" data-x="15" aria-label="Dispatch mark"></div><div>Storm reason (0 to 5)<input type="number" min="0" max="5" step="0.5" value="${m[1]||0}" data-m="1" data-x="5" aria-label="Storm reason mark"></div></div>`;
+ h+=`<div class="ans"><span class="k">STORM REASON (${sm[0]||'none'})</span><br>${E(sm[1]||'(none)')}</div><div class="ans"><span class="k">DISPATCH</span><br>${E(g('disp')||'(none)')}</div>`;
+ h+=`<div class="k" style="margin-top:14px">WHAT HAPPENED, AND WHEN</div><ul class="tl">${s.l.map(e=>`<li><time>${fmt(e[0])}</time>${E(desc(e[1],e[2]))}</li>`).join('')}</ul></div>`;return h}
+const A={
+ add(){const L=$('#in').value.split('\n').map(x=>x.trim()).filter(Boolean);let n=0,b=0;L.forEach(l=>{try{const s=parse(l);if(subs().some(x=>x.key==s.key))return;D.codes.push(l);n++}catch(e){b++}});msg=n+' added'+(b?'. Skipped '+b+' unreadable':'');save();draw()},
+ sel(v){sel=v;draw();const e=$('.card:last-child');if(e)e.scrollIntoView({behavior:'smooth'})},
+ clr(){if(!armed){armed=1;draw();return}D={codes:[],marks:{}};armed=0;sel=null;save();draw()},
+ tsv(){const R=ranked(),t=['Rank\tTeam\tCode\tTotal\tAuto\tJudge\tTempo\tTablet\tScales\tDockyard\tScroll\tCause\tPlan\tStorm\tSeconds'].concat(R.map((r,i)=>[i+1,r.s.t,r.s.c,r.c.total.toFixed(2),r.c.auto.toFixed(1),r.c.man.toFixed(1),r.c.tempo.toFixed(2),r.c.pr.toFixed(1),r.c.sc.toFixed(1),r.c.dy,r.c.sl,r.c.diag,r.c.plan,r.c.storm,r.s.x].join('\t'))).join('\n');
+  const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();let ok=0;try{ok=document.execCommand('copy')}catch(e){}ta.remove();if(navigator.clipboard)navigator.clipboard.writeText(t).catch(()=>{});msg=ok?'Scoresheet copied. Paste it into Sheets.':'Copy blocked, try again.';draw()}};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b)A[b.dataset.a](b.dataset.v)});
+document.addEventListener('change',e=>{const i=e.target.dataset&&e.target.dataset.m;if(i==null||!sel)return;const m=D.marks[sel]=D.marks[sel]||[0,0];m[+i]=Math.max(0,Math.min(+e.target.dataset.x,+e.target.value||0));save();const y=window.scrollY;draw();window.scrollTo(0,y)});
+draw();
+</script>
+</body>
+</html>
